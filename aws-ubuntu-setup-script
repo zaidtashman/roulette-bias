@@ -1,0 +1,14 @@
+wget https://repo.continuum.io/archive/Anaconda3-5.2.0-Linux-x86_64.sh
+bash Anaconda3-5.2.0-Linux-x86_64.sh
+sudo reboot
+pip install pystan
+conda install gcc
+conda update --all
+sudo apt update
+sudo apt install build-essential
+sudo reboot
+
+
+
+nohup python application.py &
+ps ax | grep application.py 
