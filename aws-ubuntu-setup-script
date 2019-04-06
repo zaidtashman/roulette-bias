@@ -12,3 +12,4 @@ sudo reboot
 
 nohup python application.py &
 ps ax | grep application.py 
+kill -9 p_id

@@ -13,10 +13,10 @@ from flask import Flask
 from flask import jsonify
 application = Flask(__name__)
 
-@application.route("/<string:name>/")
-def roulette_bias(name):
+@application.route("/roulette/<string:numbers>/")
+def roulette_bias(numbers):
 
-    print(name)
+    print(numbers)
     
     wheel = ['00','27','10','25','29','12','8','19','31','18','6','21','33',
          '16','4','23','35','14','2','0','28','9','26','30','11','7','20',
@@ -148,7 +148,7 @@ def roulette_bias(name):
     # sum(dir_prob)
     
     # spins = [wheel[x] for x in np.random.choice(38, size=5000, p=dir_prob)]
-    spins = name.split(',')
+    spins = numbers.split(',')
     
     print(spins)
     print(len(spins))
@@ -531,15 +531,34 @@ def roulette_bias(name):
                 best_bet_s.append('{},{:.2f}'.format(b,bet_expected[i]))
                 count += 1
 
+
+    def find_diff(arr_a, arr_b):
+    	arr_c = []
+    	for i in arr_b:
+    		if i not in arr_a:
+    			arr_c.append(i)
+    	return arr_c
+
     count = 0
-    max_count = 5
+    max_count = 10
+    n_num_count = 5
     best_bet_n = []
+    best_bet_n_acc = []
+    n_num_acc = []
+    current_coverage = 0.0
+    max_coverage = 0.5
     for i in bet_expected.argsort()[-len(bet_expected):][::-1]:
-        if (count < max_count):
+        #if (count < max_count):
+        if (current_coverage <= max_coverage):	
             b = bet_dic[i]
             n_bet_name, n_bet_value = b.split(':')
             if n_bet_name == 'n':
                 best_bet_n.append('{},{:.2f}'.format(neighbor[wheel.index(n_bet_value)],bet_expected[i]))
+                extra_numbers = find_diff(n_num_acc, neighbor[wheel.index(n_bet_value)])
+                current_coverage = max(len(n_num_acc)+len(extra_numbers),5)/38.0
+                best_bet_n_acc.append('{},{},{:.2f}'.format(b, extra_numbers, current_coverage))
+                n_num_acc = np.hstack([n_num_acc, neighbor[wheel.index(n_bet_value)]])
+                n_num_acc = list(set(n_num_acc))
                 count += 1
 
     count = 0
@@ -572,7 +591,7 @@ def roulette_bias(name):
                 best_bet_ee.append('{},{:.2f}'.format(b,bet_expected[i]))
                 count += 1
 
-    final_dic = {'best =====':final_bets, 's =====':best_bet_s, 'n =====':best_bet_n, 'sqsx =====':best_bet_sqsx, 'spst =====':best_bet_spst, 'ee =====':best_bet_ee}
+    final_dic = {'7_best':final_bets, '3_s':best_bet_s, '2_n':best_bet_n, '1_accn':best_bet_n_acc ,'6_sqsx':best_bet_sqsx, '5_spst':best_bet_spst, '4_ee':best_bet_ee}
 
     return jsonify(final_dic)
     #return final_dic
